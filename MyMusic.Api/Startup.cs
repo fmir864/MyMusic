@@ -12,6 +12,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyMusic.Data;
 using MyMusic.Core;
+using MyMusic.Core.Services;
+using MyMusic.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace MyMusic.Api
@@ -34,6 +36,9 @@ namespace MyMusic.Api
 
             services.AddDbContext<MyMusicDbContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("Default"), x => x.MigrationsAssembly("MyMusic.Data")));
+
+            services.AddTransient<IMusicService, MusicService>();
+            services.AddTransient<IArtistService, ArtistService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
