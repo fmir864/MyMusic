@@ -17,6 +17,8 @@ using MyMusic.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using AutoMapper;
+using MyMusic.Core.Models.Auth;
+using Microsoft.AspNetCore.Identity;
 
 namespace MyMusic.Api
 {
@@ -48,6 +50,10 @@ namespace MyMusic.Api
             });
 
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<MyMusicDbContext>()
+                .AddDefaultTokenProviders();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
