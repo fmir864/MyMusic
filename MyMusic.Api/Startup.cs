@@ -19,6 +19,7 @@ using Microsoft.OpenApi.Models;
 using AutoMapper;
 using MyMusic.Core.Models.Auth;
 using Microsoft.AspNetCore.Identity;
+using MyMusic.Api.Extensions;
 
 namespace MyMusic.Api
 {
@@ -47,6 +48,30 @@ namespace MyMusic.Api
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "My Music", Version = "v1" });
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT containing userid claim",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                });
+                var security =
+                new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Id = "Bearer",
+                                Type = ReferenceType.SecurityScheme
+                            },
+                            UnresolvedReference = true
+                        },
+                        new List<string>()
+                    }
+                };
+                options.AddSecurityRequirement(security);
             });
 
             services.AddAutoMapper(typeof(Startup));
@@ -54,6 +79,12 @@ namespace MyMusic.Api
             services.AddIdentity<User, Role>()
                 .AddEntityFrameworkStores<MyMusicDbContext>()
                 .AddDefaultTokenProviders();
+
+            services.Configure<JwtSettings>(Configuration.GetSection("Jwt"));
+
+            var jwtSettings = Configuration.GetSection("Jwt").Get<JwtSettings>();
+
+            services.AddAuth(jwtSettings);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,7 +99,7 @@ namespace MyMusic.Api
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseAuth();
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
